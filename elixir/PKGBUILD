@@ -1,0 +1,31 @@
+pkgname="carbonio-elixir"
+pkgver="1.13.3"
+pkgrel="1"
+pkgdesc="A functional meta-programming aware language built on top of the Erlang VM"
+pkgdesclong=(
+  "A functional meta-programming aware language built on top of the Erlang VM"
+)
+url="https://www.zextras.com/"
+maintainer="Zextras <packages@zextras.com>"
+license=("Apache")
+arch="all"
+depends=("carbonio-erlang")
+makedepends=("carbonio-erlang")
+sources=(
+  "https://github.com/elixir-lang/elixir/archive/v${pkgver}.tar.gz"
+)
+hashsums=(
+  "652779f7199f5524e2df1747de0e373d8b9f1d1206df25b2e551cd0ad33f8440"
+)
+
+build() {
+  cd elixir-"${pkgver}"
+
+  export PATH="/opt/zextras/common/bin/:$PATH"
+  make
+}
+
+package() {
+  cd elixir-"${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
