@@ -5,11 +5,11 @@
   "output": "artifacts",
   "projects": [
     {
-      "name": "erlang"
+      "name": "erlang",
+      "install": true
     },
     {
-      "name": "elixir",
-      "install": true
+      "name": "elixir"
     }
   ]
 }

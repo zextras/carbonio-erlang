@@ -8,9 +8,13 @@ pkgdesclong=(
 url="https://www.zextras.com/"
 maintainer="Zextras <packages@zextras.com>"
 license=("Apache")
-arch="all"
+section="utils"
+priority="optional"
+arch="amd64"
 depends=("carbonio-erlang")
-makedepends=("carbonio-erlang")
+provides:yum=(
+  "/usr/bin/elixir"
+)
 sources=(
   "https://github.com/elixir-lang/elixir/archive/v${pkgver}.tar.gz"
 )
@@ -19,13 +23,16 @@ hashsums=(
 )
 
 build() {
-  cd elixir-"${pkgver}"
-
   export PATH="/opt/zextras/common/bin/:$PATH"
+
+  cd elixir-"${pkgver}"
   make
 }
 
 package() {
+  export PATH="/opt/zextras/common/bin/:$PATH"
+
   cd elixir-"${pkgver}"
-  make DESTDIR="${pkgdir}" install
+  make DESTDIR="${pkgdir}" PREFIX=/usr install
+  rm -rf "${pkgdir}"/usr/share/man
 }

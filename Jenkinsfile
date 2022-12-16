@@ -113,6 +113,7 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 52FD40243
             }
             steps {
                 unstash 'artifacts-ubuntu-focal'
+                unstash 'artifacts-rocky-8'
 
                 script {
                     def server = Artifactory.server 'zextras-artifactory'
@@ -148,6 +149,7 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 52FD40243
             }
             steps {
                 unstash 'artifacts-ubuntu-focal'
+                unstash 'artifacts-rocky-8'
 
                 script {
                     def server = Artifactory.server 'zextras-artifactory'
@@ -182,7 +184,8 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 52FD40243
                 buildingTag()
             }
             steps {
-                unstash 'artifacts-ubuntu-bionic'
+                unstash 'artifacts-ubuntu-focal'
+                unstash 'artifacts-rocky-8'
 
                 script {
                     def server = Artifactory.server 'zextras-artifactory'
