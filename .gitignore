@@ -4,3 +4,4 @@
 start
 artifacts/
 .trunk
+.idea/
