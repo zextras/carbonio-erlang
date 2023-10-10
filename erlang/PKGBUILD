@@ -57,7 +57,7 @@ hashsums=(
 build() {
   export PATH="$PATH:${srcdir}/fop-2.8/fop"
 
-  cd "${srcdir}/OTP-${pkgver}"
+  cd "${srcdir}/otp-OTP-${pkgver}"
   ./otp_build autoconf
 
   ./configure \
@@ -72,7 +72,7 @@ build() {
 package() {
   cd "${srcdir}"
 
-  make -C OTP-${pkgver} DESTDIR="${pkgdir}" install
+  make -C otp-OTP-${pkgver} DESTDIR="${pkgdir}" install
 
   # services and configuration
   install -Dm644 epmd.service "${pkgdir}/lib/systemd/system/epmd.service"
