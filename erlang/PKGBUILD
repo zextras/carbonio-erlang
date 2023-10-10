@@ -1,5 +1,5 @@
 pkgname="carbonio-erlang"
-pkgver="24.3.2"
+pkgver="26.1.1"
 pkgrel="1"
 pkgdesc="General-purpose concurrent functional programming language (headless version)"
 pkgdesclong=(
@@ -43,7 +43,7 @@ sources=(
   "epmd.conf"
   "epmd.service"
   "epmd.socket"
-  "https://github.com/erlang/otp/archive/7bd6e24d3dded3a393f9bb774ccf98cc0af4d595.tar.gz"
+  "https://github.com/erlang/otp/archive/OTP-${pkgver}.tar.gz"
   "https://dlcdn.apache.org//xmlgraphics/fop/binaries/fop-2.8-bin.tar.gz"
 )
 hashsums=(
@@ -57,7 +57,7 @@ hashsums=(
 build() {
   export PATH="$PATH:${srcdir}/fop-2.8/fop"
 
-  cd "${srcdir}/otp-7bd6e24d3dded3a393f9bb774ccf98cc0af4d595"
+  cd "${srcdir}/otp-${pkgver}"
   ./otp_build autoconf
 
   ./configure \
@@ -72,7 +72,7 @@ build() {
 package() {
   cd "${srcdir}"
 
-  make -C otp-7bd6e24d3dded3a393f9bb774ccf98cc0af4d595 DESTDIR="${pkgdir}" install
+  make -C otp-${pkgver} DESTDIR="${pkgdir}" install
 
   # services and configuration
   install -Dm644 epmd.service "${pkgdir}/lib/systemd/system/epmd.service"
