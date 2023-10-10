@@ -44,7 +44,7 @@ sources=(
   "epmd.service"
   "epmd.socket"
   "https://github.com/erlang/otp/archive/OTP-${pkgver}.tar.gz"
-  "https://dlcdn.apache.org//xmlgraphics/fop/binaries/fop-2.8-bin.tar.gz"
+  "https://dlcdn.apache.org//xmlgraphics/fop/binaries/fop-2.9-bin.tar.gz"
 )
 hashsums=(
   "1675ac9bf948ab19e8b63077d870ccf356fcdbce14de2777f00b3488aa1ce34a5e0a5cdc0428707f744dee5940b12653a44e0ded0554de95ebb31bce4676ff87"
