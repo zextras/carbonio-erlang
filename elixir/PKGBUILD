@@ -19,7 +19,7 @@ sources=(
   "https://github.com/elixir-lang/elixir/archive/v${pkgver}.tar.gz"
 )
 hashsums=(
-  "skip"
+  "ac281e4c84a9bf385caef82e53cda1868eb9f3108f45a1237296b1586fe05dbd"
 )
 
 build() {
