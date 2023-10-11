@@ -82,10 +82,10 @@ pipeline {
                             passwordVariable: 'SECRET',
                             usernameVariable: 'USERNAME')]) {
                                 sh 'echo "[Zextras]" > zextras.repo'
-                                sh 'echo "baseurl=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-playground/" >> zextras.repo'
+                                sh 'echo "baseurl=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-rc/" >> zextras.repo'
                                 sh 'echo "enabled=1" >> zextras.repo'
                                 sh 'echo "gpgcheck=0" >> zextras.repo'
-                                sh 'echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-playground/repomd.xml.key" >> zextras.repo'
+                                sh 'echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-rc/repomd.xml.key" >> zextras.repo'
                                 sh 'sudo mv zextras.repo /etc/yum.repos.d/zextras.repo'
                         }
                         sh 'sudo pacur build rocky-8 .'
