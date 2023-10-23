@@ -1,7 +1,7 @@
 {
   "name": "erlang",
   "description": "Erlang and Elixir package for Carbonio",
-  "build_dir": "/tmp/",
+  "buildDir": "/tmp/",
   "output": "artifacts",
   "projects": [
     {
