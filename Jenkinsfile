@@ -239,7 +239,7 @@ pipeline {
         }
         stage('Upload To Devel') {
             when {
-                branch "main"
+                branch "devel"
             }
             steps {
                 unstash 'artifacts-ubuntu-focal'
