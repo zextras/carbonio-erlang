@@ -54,6 +54,7 @@ build() {
 
   ./configure \
     --enable-builtin-zlib \
+    --enable-fips \
     --enable-smp-support \
     --prefix=/opt/zextras/common \
     --with-odbc \
