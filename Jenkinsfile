@@ -52,7 +52,14 @@ pipeline {
                           sudo echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel focal main" > zextras.list
                           sudo mv zextras.list /etc/apt/sources.list.d/
                         '''
-                        sh 'sudo yap build ubuntu-focal .'
+                        script {
+                            if (BRANCH_NAME == 'devel') {
+                                def timestamp = new Date().format('yyyyMMddHHmmss')
+                                sh "sudo yap build ubuntu-focal . -r ${timestamp}"
+                            } else {
+                                sh 'sudo yap build ubuntu-focal .'
+                            }
+                        }
                         stash includes: 'artifacts/*focal*.deb', name: 'artifacts-ubuntu-focal'
                     }
                     post {
@@ -89,7 +96,14 @@ pipeline {
                           sudo echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel jammy main" > zextras.list
                           sudo mv zextras.list /etc/apt/sources.list.d/
                         '''
-                        sh 'sudo yap build ubuntu-jammy .'
+                        script {
+                            if (BRANCH_NAME == 'devel') {
+                                def timestamp = new Date().format('yyyyMMddHHmmss')
+                                sh "sudo yap build ubuntu-jammy . -r ${timestamp}"
+                            } else {
+                                sh 'sudo yap build ubuntu-jammy .'
+                            }
+                        }
                         stash includes: 'artifacts/*jammy*.deb', name: 'artifacts-ubuntu-jammy'
                     }
                     post {
@@ -128,7 +142,14 @@ pipeline {
                                 sh 'echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-devel/repomd.xml.key" >> zextras.repo'
                                 sh 'sudo mv zextras.repo /etc/yum.repos.d/zextras.repo'
                         }
-                        sh 'sudo yap build rocky-8 .'
+                        script {
+                            if (BRANCH_NAME == 'devel') {
+                                def timestamp = new Date().format('yyyyMMddHHmmss')
+                                sh "sudo yap build rocky-8 . -r ${timestamp}"
+                            } else {
+                                sh 'sudo yap build rocky-8 .'
+                            }
+                        }
                         stash includes: 'artifacts/x86_64/*el8*.rpm', name: 'artifacts-rocky-8'
                     }
                     post {
@@ -162,7 +183,14 @@ pipeline {
                                 sh 'echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/rhel9-devel/repomd.xml.key" >> zextras.repo'
                                 sh 'sudo mv zextras.repo /etc/yum.repos.d/zextras.repo'
                         }
-                        sh 'sudo yap build rocky-9 .'
+                        script {
+                            if (BRANCH_NAME == 'devel') {
+                                def timestamp = new Date().format('yyyyMMddHHmmss')
+                                sh "sudo yap build rocky-9 . -r ${timestamp}"
+                            } else {
+                                sh 'sudo yap build rocky-9 .'
+                            }
+                        }
                         stash includes: 'artifacts/x86_64/*el9*.rpm', name: 'artifacts-rocky-9'
                     }
                     post {
