@@ -30,7 +30,7 @@ pipeline {
                 stash includes: '**', name: 'project'
             }
         }
-        stage("Ubuntu packages") {
+        stage("Build packages") {
             parallel {
                 stage('Ubuntu 20') {
                     agent {
@@ -120,10 +120,6 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        stage("RHEL packages") {
-            parallel {
                 stage('Rocky 8') {
                     agent {
                         node {
