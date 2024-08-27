@@ -1,6 +1,6 @@
 pkgname="carbonio-erlang"
 pkgver="26.2.5.2"
-pkgrel="1"
+pkgrel="2"
 pkgdesc="General-purpose concurrent functional programming language (headless version)"
 arch=('x86_64')
 url="https://erlang.org/"
