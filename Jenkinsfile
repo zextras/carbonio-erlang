@@ -44,18 +44,18 @@ pipeline {
                                 sh 'echo "machine zextras.jfrog.io" >> auth.conf'
                                 sh 'echo "login $USERNAME" >> auth.conf'
                                 sh 'echo "password $SECRET" >> auth.conf'
-                                sh 'sudo mv auth.conf /etc/apt'
+                                sh 'mv auth.conf /etc/apt'
                         }
                         sh '''
-                          sudo echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel focal main" > zextras.list
-                          sudo mv zextras.list /etc/apt/sources.list.d/
+                          echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel focal main" > zextras.list
+                          mv zextras.list /etc/apt/sources.list.d/
                         '''
                         script {
                             if (BRANCH_NAME == 'devel') {
                                 def timestamp = new Date().format('yyyyMMddHHmmss')
-                                sh "sudo yap build ubuntu-jammy . -r ${timestamp}"
+                                sh "yap build ubuntu-jammy . -r ${timestamp}"
                             } else {
-                                sh 'sudo yap build ubuntu-jammy .'
+                                sh 'yap build ubuntu-jammy .'
                             }
                         }
                         stash includes: 'artifacts/*jammy*.deb', name: 'artifacts-ubuntu-jammy'
@@ -88,18 +88,18 @@ pipeline {
                                 sh 'echo "machine zextras.jfrog.io" >> auth.conf'
                                 sh 'echo "login $USERNAME" >> auth.conf'
                                 sh 'echo "password $SECRET" >> auth.conf'
-                                sh 'sudo mv auth.conf /etc/apt'
+                                sh 'mv auth.conf /etc/apt'
                         }
                         sh '''
-                          sudo echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel noble main" > zextras.list
-                          sudo mv zextras.list /etc/apt/sources.list.d/
+                          echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel noble main" > zextras.list
+                          mv zextras.list /etc/apt/sources.list.d/
                         '''
                         script {
                             if (BRANCH_NAME == 'devel') {
                                 def timestamp = new Date().format('yyyyMMddHHmmss')
-                                sh "sudo yap build ubuntu-noble . -r ${timestamp}"
+                                sh "yap build ubuntu-noble . -r ${timestamp}"
                             } else {
-                                sh 'sudo yap build ubuntu-noble .'
+                                sh 'yap build ubuntu-noble .'
                             }
                         }
                         stash includes: 'artifacts/*noble*.deb', name: 'artifacts-ubuntu-noble'
@@ -134,14 +134,14 @@ pipeline {
                                 sh 'echo "enabled=1" >> zextras.repo'
                                 sh 'echo "gpgcheck=0" >> zextras.repo'
                                 sh 'echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-devel/repomd.xml.key" >> zextras.repo'
-                                sh 'sudo mv zextras.repo /etc/yum.repos.d/zextras.repo'
+                                sh 'mv zextras.repo /etc/yum.repos.d/zextras.repo'
                         }
                         script {
                             if (BRANCH_NAME == 'devel') {
                                 def timestamp = new Date().format('yyyyMMddHHmmss')
-                                sh "sudo yap build rocky-8 . -r ${timestamp}"
+                                sh "yap build rocky-8 . -r ${timestamp}"
                             } else {
-                                sh 'sudo yap build rocky-8 .'
+                                sh 'yap build rocky-8 .'
                             }
                         }
                         stash includes: 'artifacts/x86_64/*el8*.rpm', name: 'artifacts-rocky-8'
@@ -175,14 +175,14 @@ pipeline {
                                 sh 'echo "enabled=1" >> zextras.repo'
                                 sh 'echo "gpgcheck=0" >> zextras.repo'
                                 sh 'echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/rhel9-devel/repomd.xml.key" >> zextras.repo'
-                                sh 'sudo mv zextras.repo /etc/yum.repos.d/zextras.repo'
+                                sh 'mv zextras.repo /etc/yum.repos.d/zextras.repo'
                         }
                         script {
                             if (BRANCH_NAME == 'devel') {
                                 def timestamp = new Date().format('yyyyMMddHHmmss')
-                                sh "sudo yap build rocky-9 . -r ${timestamp}"
+                                sh "yap build rocky-9 . -r ${timestamp}"
                             } else {
-                                sh 'sudo yap build rocky-9 .'
+                                sh 'yap build rocky-9 .'
                             }
                         }
                         stash includes: 'artifacts/x86_64/*el9*.rpm', name: 'artifacts-rocky-9'
