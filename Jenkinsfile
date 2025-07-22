@@ -11,7 +11,7 @@ pipeline {
     }
     agent {
         node {
-            label 'base-agent-v1'
+            label 'base'
         }
     }
     environment {
@@ -20,11 +20,6 @@ pipeline {
     }
     stages {
         stage('Checkout & Stash') {
-            agent {
-                node {
-                    label 'base-agent-v1'
-                }
-            }
             steps {
                 checkout scm
                 script {
@@ -35,10 +30,10 @@ pipeline {
         }
         stage("Build packages") {
             parallel {
-                stage('Ubuntu 20') {
+                stage('Ubuntu 22') {
                     agent {
                         node {
-                            label 'yap-agent-ubuntu-20.04-v2'
+                            label 'yap-ubuntu-22-v1'
                         }
                     }
                     steps {
@@ -53,50 +48,6 @@ pipeline {
                         }
                         sh '''
                           sudo echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel focal main" > zextras.list
-                          sudo mv zextras.list /etc/apt/sources.list.d/
-                        '''
-                        script {
-                            if (BRANCH_NAME == 'devel') {
-                                def timestamp = new Date().format('yyyyMMddHHmmss')
-                                sh "sudo yap build ubuntu-focal . -r ${timestamp}"
-                            } else {
-                                sh 'sudo yap build ubuntu-focal .'
-                            }
-                        }
-                        stash includes: 'artifacts/*focal*.deb', name: 'artifacts-ubuntu-focal'
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'artifacts/*focal*.deb',
-                            fingerprint: true
-                        }
-                        failure {
-                            script {
-                                if ("main".equals(env.BRANCH_NAME)) {
-                                    sendFailureEmail(STAGE_NAME)
-                                }
-                            }
-                        }
-                    }
-                }
-                stage('Ubuntu 22') {
-                    agent {
-                        node {
-                            label 'yap-agent-ubuntu-22.04-v2'
-                        }
-                    }
-                    steps {
-                        unstash 'project'
-                        withCredentials([usernamePassword(credentialsId: 'artifactory-jenkins-gradle-properties-splitted',
-                            passwordVariable: 'SECRET',
-                            usernameVariable: 'USERNAME')]) {
-                                sh 'echo "machine zextras.jfrog.io" >> auth.conf'
-                                sh 'echo "login $USERNAME" >> auth.conf'
-                                sh 'echo "password $SECRET" >> auth.conf'
-                                sh 'sudo mv auth.conf /etc/apt'
-                        }
-                        sh '''
-                          sudo echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel jammy main" > zextras.list
                           sudo mv zextras.list /etc/apt/sources.list.d/
                         '''
                         script {
@@ -126,7 +77,7 @@ pipeline {
                 stage('Ubuntu 24') {
                     agent {
                         node {
-                            label 'yap-agent-ubuntu-24.04-v2'
+                            label 'yap-ubuntu-24-v1'
                         }
                     }
                     steps {
@@ -170,7 +121,7 @@ pipeline {
                 stage('Rocky 8') {
                     agent {
                         node {
-                            label 'yap-agent-rocky-8-v2'
+                            label 'yap-rocky-8-v1'
                         }
                     }
                     steps {
@@ -211,7 +162,7 @@ pipeline {
                 stage('Rocky 9') {
                     agent {
                         node {
-                            label 'yap-agent-rocky-9-v2'
+                            label 'yap-rocky-9-v1'
                         }
                     }
                     steps {
@@ -258,7 +209,6 @@ pipeline {
                 }
             }
             steps {
-                unstash 'artifacts-ubuntu-focal'
                 unstash 'artifacts-ubuntu-jammy'
                 unstash 'artifacts-ubuntu-noble'
                 unstash 'artifacts-rocky-8'
@@ -271,11 +221,6 @@ pipeline {
                     buildInfo = Artifactory.newBuildInfo()
                     uploadSpec = """{
                         "files": [
-                            {
-                                "pattern": "artifacts/*focal*.deb",
-                                "target": "ubuntu-playground/pool/",
-                                "props": "deb.distribution=focal;deb.component=main;deb.architecture=amd64;vcs.revision=${env.GIT_COMMIT}"
-                            },
                             {
                                 "pattern": "artifacts/*jammy*.deb",
                                 "target": "ubuntu-playground/pool/",
@@ -317,7 +262,6 @@ pipeline {
                 branch "devel"
             }
             steps {
-                unstash 'artifacts-ubuntu-focal'
                 unstash 'artifacts-ubuntu-jammy'
                 unstash 'artifacts-ubuntu-noble'
                 unstash 'artifacts-rocky-8'
@@ -330,11 +274,6 @@ pipeline {
                     buildInfo = Artifactory.newBuildInfo()
                     uploadSpec = """{
                         "files": [
-                            {
-                                "pattern": "artifacts/*focal*.deb",
-                                "target": "ubuntu-devel/pool/",
-                                "props": "deb.distribution=focal;deb.component=main;deb.architecture=amd64;vcs.revision=${env.GIT_COMMIT}"
-                            },
                             {
                                 "pattern": "artifacts/*jammy*.deb",
                                 "target": "ubuntu-devel/pool/",
@@ -376,7 +315,6 @@ pipeline {
                 buildingTag()
             }
             steps {
-                unstash 'artifacts-ubuntu-focal'
                 unstash 'artifacts-ubuntu-jammy'
                 unstash 'artifacts-ubuntu-noble'
                 unstash 'artifacts-rocky-8'
@@ -393,11 +331,6 @@ pipeline {
                     buildInfo.name += '-ubuntu'
                     uploadSpec = """{
                         "files": [
-                            {
-                                "pattern": "artifacts/*focal*.deb",
-                                "target": "ubuntu-rc/pool/",
-                                "props": "deb.distribution=focal;deb.component=main;deb.architecture=amd64;vcs.revision=${env.GIT_COMMIT}"
-                            },
                             {
                                 "pattern": "artifacts/*jammy*.deb",
                                 "target": "ubuntu-rc/pool/",
