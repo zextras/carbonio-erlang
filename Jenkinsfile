@@ -15,7 +15,6 @@ pipeline {
         }
     }
     environment {
-        NETWORK_OPTS = '--network ci_agent'
         FAILURE_EMAIL_RECIPIENTS='smokybeans@zextras.com'
     }
     stages {
@@ -52,6 +51,7 @@ pipeline {
                             mv zextras.list /etc/apt/sources.list.d/
                             '''
                             script {
+                                sh 'yap prepare ubuntu-jammy -g'
                                 if (BRANCH_NAME == 'devel') {
                                     def timestamp = new Date().format('yyyyMMddHHmmss')
                                     sh "yap build ubuntu-jammy . -r ${timestamp}"
@@ -98,6 +98,7 @@ pipeline {
                             mv zextras.list /etc/apt/sources.list.d/
                             '''
                             script {
+                                sh 'yap prepare ubuntu-noble -g'
                                 if (BRANCH_NAME == 'devel') {
                                     def timestamp = new Date().format('yyyyMMddHHmmss')
                                     sh "yap build ubuntu-noble . -r ${timestamp}"
@@ -142,6 +143,7 @@ pipeline {
                                     sh 'mv zextras.repo /etc/yum.repos.d/zextras.repo'
                             }
                             script {
+                                sh 'yap prepare rocky-8 -g'
                                 if (BRANCH_NAME == 'devel') {
                                     def timestamp = new Date().format('yyyyMMddHHmmss')
                                     sh "yap build rocky-8 . -r ${timestamp}"
@@ -150,11 +152,11 @@ pipeline {
                                 }
                             }
                         }
-                        stash includes: 'artifacts/x86_64/*el8*.rpm', name: 'artifacts-rocky-8'
+                        stash includes: 'artifacts/*el8*.rpm', name: 'artifacts-rocky-8'
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'artifacts/x86_64/*el8*.rpm', fingerprint: true
+                            archiveArtifacts artifacts: 'artifacts/*el8*.rpm', fingerprint: true
                         }
                         failure {
                             script {
@@ -185,6 +187,7 @@ pipeline {
                                     sh 'mv zextras.repo /etc/yum.repos.d/zextras.repo'
                             }
                             script {
+                                sh 'yap prepare rocky-9 -g'
                                 if (BRANCH_NAME == 'devel') {
                                     def timestamp = new Date().format('yyyyMMddHHmmss')
                                     sh "yap build rocky-9 . -r ${timestamp}"
@@ -193,11 +196,11 @@ pipeline {
                                 }
                             }
                         }
-                        stash includes: 'artifacts/x86_64/*el9*.rpm', name: 'artifacts-rocky-9'
+                        stash includes: 'artifacts/*el9*.rpm', name: 'artifacts-rocky-9'
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'artifacts/x86_64/*el9*.rpm', fingerprint: true
+                            archiveArtifacts artifacts: 'artifacts/*el9*.rpm', fingerprint: true
                         }
                         failure {
                             script {
@@ -240,22 +243,22 @@ pipeline {
                                 "props": "deb.distribution=noble;deb.component=main;deb.architecture=amd64;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-elixir)-(*).el8.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-elixir)-(*).el8.x86_64.rpm",
                                 "target": "centos8-playground/zextras/{1}/{1}-{2}.el8.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-erlang)-(*).el8.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-erlang)-(*).el8.x86_64.rpm",
                                 "target": "centos8-playground/zextras/{1}/{1}-{2}.el8.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-elixir)-(*).el9.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-elixir)-(*).el9.x86_64.rpm",
                                 "target": "rhel9-playground/zextras/{1}/{1}-{2}.el9.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-erlang)-(*).el9.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-erlang)-(*).el9.x86_64.rpm",
                                 "target": "rhel9-playground/zextras/{1}/{1}-{2}.el9.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             }
@@ -293,22 +296,22 @@ pipeline {
                                 "props": "deb.distribution=noble;deb.component=main;deb.architecture=amd64;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-elixir)-(*).el8.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-elixir)-(*).el8.x86_64.rpm",
                                 "target": "centos8-devel/zextras/{1}/{1}-{2}.el8.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-erlang)-(*).el8.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-erlang)-(*).el8.x86_64.rpm",
                                 "target": "centos8-devel/zextras/{1}/{1}-{2}.el8.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-elixir)-(*).el9.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-elixir)-(*).el9.x86_64.rpm",
                                 "target": "rhel9-devel/zextras/{1}/{1}-{2}.el9.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-erlang)-(*).el9.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-erlang)-(*).el9.x86_64.rpm",
                                 "target": "rhel9-devel/zextras/{1}/{1}-{2}.el9.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             }
@@ -374,12 +377,12 @@ pipeline {
                     uploadSpec= """{
                         "files": [
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-elixir)-(*).el8.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-elixir)-(*).el8.x86_64.rpm",
                                 "target": "centos8-rc/zextras/{1}/{1}-{2}.el8.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-erlang)-(*).el8.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-erlang)-(*).el8.x86_64.rpm",
                                 "target": "centos8-rc/zextras/{1}/{1}-{2}.el8.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             }
@@ -408,12 +411,12 @@ pipeline {
                     uploadSpec= """{
                         "files": [
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-elixir)-(*).el9.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-elixir)-(*).el9.x86_64.rpm",
                                 "target": "rhel9-rc/zextras/{1}/{1}-{2}.el9.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             },
                             {
-                                "pattern": "artifacts/x86_64/(carbonio-erlang)-(*).el9.x86_64.rpm",
+                                "pattern": "artifacts/(carbonio-erlang)-(*).el9.x86_64.rpm",
                                 "target": "rhel9-rc/zextras/{1}/{1}-{2}.el9.x86_64.rpm",
                                 "props": "rpm.metadata.arch=x86_64;rpm.metadata.vendor=zextras;vcs.revision=${env.GIT_COMMIT}"
                             }
