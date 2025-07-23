@@ -47,7 +47,7 @@ pipeline {
                                     sh 'mv auth.conf /etc/apt'
                             }
                             sh '''
-                            echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel focal main" > zextras.list
+                            echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel jammy main" > zextras.list
                             mv zextras.list /etc/apt/sources.list.d/
                             '''
                             script {
