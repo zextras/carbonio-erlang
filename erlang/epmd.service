@@ -6,6 +6,7 @@ EnvironmentFile=/etc/conf.d/epmd
 ExecStart=/opt/zextras/common/lib/erlang/bin/epmd -daemon $EPMD_OPTS
 ExecStop=/opt/zextras/common/lib/erlang/bin/epmd -kill
 Type=forking
+PartOf=carbonio.target
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=carbonio.target
