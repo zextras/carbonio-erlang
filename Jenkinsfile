@@ -1,9 +1,9 @@
 library(
-    identifier: 'jenkins-packages-build-library@1.0.4',
+    identifier: 'jenkins-lib-common@1.1.2',
     retriever: modernSCM([
         $class: 'GitSCMSource',
-        remote: 'git@github.com:zextras/jenkins-packages-build-library.git',
-        credentialsId: 'jenkins-integration-with-github-account'
+        credentialsId: 'jenkins-integration-with-github-account',
+        remote: 'git@github.com:zextras/jenkins-lib-common.git',
     ])
 )
 
@@ -24,22 +24,17 @@ pipeline {
         timeout(time: 3, unit: 'HOURS')
     }
 
-    parameters {
-        booleanParam defaultValue: false,
-            description: 'Whether to upload the packages in playground repositories',
-            name: 'PLAYGROUND'
-    }
 
-    tools {
-        jfrog 'jfrog-cli'
-    }
+
+
 
     stages {
-        stage('Checkout & Stash') {
+        stage('Setup') {
             steps {
                 checkout scm
                 script {
                     gitMetadata()
+                    properties(defaultPipelineProperties())
                 }
             }
         }
@@ -109,11 +104,16 @@ pipeline {
             }
         }
 
-        stage('Upload artifacts')
-        {
+        stage('Upload artifacts') {
+            when {
+                expression { return uploadStage.shouldUpload() }
+            }
+            tools {
+                jfrog 'jfrog-cli'
+            }
             steps {
                 uploadStage(
-                    packages: yapHelper.getPackageNames()
+                    packages: yapHelper.resolvePackageNames()
                 )
             }
             post {
