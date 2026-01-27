@@ -5,3 +5,5 @@ start
 artifacts/
 .trunk
 .idea/
+.ccache/
+**/src/
