@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-only
+
 pkgname="carbonio-elixir"
 pkgver="1.17.2" # renovate: datasource=github-tags depName=elixir-lang/elixir
 pkgrel="1"
