@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-only
+
 pkgname="carbonio-erlang"
 pkgver="26.2.5.2" # renovate: datasource=github-tags depName=erlang/otp
 pkgrel="2"
@@ -43,9 +47,9 @@ source=(
   "https://github.com/erlang/otp/archive/OTP-${pkgver}.tar.gz"
 )
 sha256sums=(
-  '78ce5e67b21758c767d727e56b20502f75dc4385ff9b6c6db312d8e8506f2df2'
-  '44d00882c45ea5df8134714489e9836a332452601ac70f48daa121e63bd2cbed'
-  '998a759e4cea4527f9d9b241bf9f32527d7378d63ea40afa38443c6c3ceaea34'
+  'df7d8b3378eaa522d4e1354869d5202fe609ecda3f60ba566934f6d1fe4e4d67'
+  'eb3c7093d548a4ebfa5a2af5f204d836b77668e4c3419b110e6fe10941c4ae90'
+  '1d69277d5b03824808532206edf68f9fc30e09be0542be8e01087d740d0cf3d6'
   '8e537e2d984770796cc7f0c7c079a9e5fbc67b8c368e0dcd9aa2ceaeb2844da2'
 )
 
