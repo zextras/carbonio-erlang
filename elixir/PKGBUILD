@@ -16,7 +16,9 @@ depends=("carbonio-erlang")
 source=(
   "https://github.com/elixir-lang/elixir/archive/v${pkgver}.tar.gz"
 )
-sha256sums=('7bb8e6414b77c1707f39f620a2ad54f68d64846d663ec78069536854247fb1ab')
+sha256sums=(
+  '7bb8e6414b77c1707f39f620a2ad54f68d64846d663ec78069536854247fb1ab'
+)
 
 build() {
   export PATH="/opt/zextras/common/bin/:$PATH"
