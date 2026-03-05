@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 
 pkgname="carbonio-elixir"
-pkgver="1.17.2" # renovate: datasource=github-tags depName=elixir-lang/elixir
+pkgver="1.19.5" # renovate: datasource=github-tags depName=elixir-lang/elixir
 pkgrel="1"
 pkgdesc="A functional meta-programming aware language built on top of the Erlang VM"
 url="https://www.zextras.com/"
