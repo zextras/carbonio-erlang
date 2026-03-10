@@ -20,7 +20,7 @@ CCACHE_DIR ?= $(CURDIR)/.ccache
 # Container mount options
 CONTAINER_OPTS = --rm -ti \
 	-v $(CURDIR):/project \
-	-v $(CURDIR)/$(OUTPUT_DIR):/artifacts \
+	-v $(CURDIR)/artifacts:/artifacts \
 	-v $(CCACHE_DIR):/root/.ccache \
 	-e CCACHE_DIR=/root/.ccache \
 	--entrypoint bash
@@ -34,7 +34,7 @@ DEPS_MOUNT =
 DEPS_ARG = none
 endif
 
-.PHONY: help build build-erlang build-elixir clean
+.PHONY: help build debug-build clean
 
 .DEFAULT_GOAL := help
 
@@ -47,9 +47,8 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  help           Show this help message"
-	@echo "  build          Build both erlang and elixir packages"
-	@echo "  build-erlang   Build only erlang package"
-	@echo "  build-elixir   Build only elixir package"
+	@echo "  build          Build all packages (erlang + elixir)"
+	@echo "  debug-build    Start interactive shell in build container"
 	@echo "  clean          Remove build artifacts"
 	@echo ""
 	@echo "Options:"
@@ -65,27 +64,29 @@ help:
 	@echo "  # Build with dependencies (community contributors)"
 	@echo "  make build TARGET=ubuntu-jammy DEPS_DIR=../carbonio-thirds/artifacts"
 	@echo ""
-	@echo "  # Build only erlang with dependencies"
-	@echo "  make build-erlang TARGET=rocky-9 DEPS_DIR=../carbonio-thirds/artifacts"
+
+## build: Build all packages (erlang + elixir)
+build:
+	@mkdir -p artifacts $(CCACHE_DIR)
+	$(CONTAINER_RUNTIME) run $(CONTAINER_OPTS) $(DEPS_MOUNT) $(YAP_IMAGE) \
+		/project/build-in-container.sh $(DEPS_ARG) $(TARGET) 2>&1 | tee build.log
+
+## debug-build: Start interactive shell in build container for manual debugging
+debug-build:
+	@mkdir -p artifacts $(CCACHE_DIR)
+	@echo "Starting interactive shell in build container..."
+	@echo "Container info:"
+	@echo "  Image: $(YAP_IMAGE)"
+	@echo "  Target: $(TARGET)"
+	@echo "  Deps: $(DEPS_ARG)"
 	@echo ""
-
-## build: Build both erlang and elixir packages
-build: build-erlang build-elixir
-
-## build-erlang: Build erlang package
-build-erlang:
-	@mkdir -p $(CCACHE_DIR)
-	$(CONTAINER_RUNTIME) run $(CONTAINER_OPTS) $(DEPS_MOUNT) $(YAP_IMAGE) \
-		/project/build-in-container.sh $(DEPS_ARG) $(TARGET) erlang
-
-## build-elixir: Build elixir package
-build-elixir:
-	@mkdir -p $(CCACHE_DIR)
-	$(CONTAINER_RUNTIME) run $(CONTAINER_OPTS) $(DEPS_MOUNT) $(YAP_IMAGE) \
-		/project/build-in-container.sh $(DEPS_ARG) $(TARGET) elixir
+	@echo "To run the build manually, execute:"
+	@echo "  /project/build-in-container.sh $(DEPS_ARG) $(TARGET) 2>&1 | tee build.log"
+	@echo ""
+	$(CONTAINER_RUNTIME) run $(CONTAINER_OPTS) $(DEPS_MOUNT) $(YAP_IMAGE)
 
 ## clean: Remove build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -rf artifacts erlang/artifacts elixir/artifacts .ccache
+	@rm -rf artifacts .ccache
 	@echo "Clean complete!"
