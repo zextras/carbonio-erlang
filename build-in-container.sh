@@ -9,14 +9,21 @@ set -e
 # This script runs INSIDE the container
 # It installs dependencies, prepares yap, and builds the package
 #
-# Usage (inside container): ./build-in-container.sh <deps-dir|none> <distro> <package-dir>
+# Usage (inside container): ./build-in-container.sh <deps-dir|none> <distro> [package-subdir]
 
 DEPS_DIR=$1
 DISTRO=$2
-PACKAGE_DIR=$3
+PACKAGE_SUBDIR=$3
 
-if [ -z "$DISTRO" ] || [ -z "$PACKAGE_DIR" ]; then
-    echo "Usage: $0 <deps-dir|none> <distro> <package-dir>"
+# If a subdirectory is provided, append it to /project, otherwise use /project
+if [ -n "$PACKAGE_SUBDIR" ]; then
+    PACKAGE_DIR="/project/$PACKAGE_SUBDIR"
+else
+    PACKAGE_DIR="/project"
+fi
+
+if [ -z "$DISTRO" ]; then
+    echo "Usage: $0 <deps-dir|none> <distro> [package-dir]"
     exit 1
 fi
 
@@ -45,7 +52,7 @@ echo "==> Running yap prepare $DISTRO -g"
 yap prepare "$DISTRO" -g
 
 # Build package
-echo "==> Running yap build $DISTRO /project/$PACKAGE_DIR"
-yap build "$DISTRO" "/project/$PACKAGE_DIR"
+echo "==> Running yap build $DISTRO $PACKAGE_DIR"
+yap build "$DISTRO" "$PACKAGE_DIR"
 
 echo "==> Build complete!"
