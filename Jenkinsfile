@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 library(
-    identifier: 'jenkins-lib-common@1.7.5',
+    identifier: 'jenkins-lib-common@v2.9.2',
     retriever: modernSCM([
         $class: 'GitSCMSource',
         credentialsId: 'jenkins-integration-with-github-account',
@@ -30,10 +30,6 @@ pipeline {
         timeout(time: 3, unit: 'HOURS')
     }
 
-
-
-
-
     stages {
         stage('Setup') {
             steps {
@@ -47,56 +43,19 @@ pipeline {
         stage('Build deb/rpm') {
             steps {
                 echo 'Building deb/rpm packages'
-                withCredentials([usernamePassword(credentialsId: 'artifactory-jenkins-gradle-properties-splitted',
-                        passwordVariable: 'SECRET',
-                        usernameVariable: 'USERNAME')]) {
-                    buildStage([
-                        prepare: true,
-                        prepareFlags: '-g',
-                        overrides: [
-                            'ubuntu-jammy': [
-                                preBuildScript: '''
-                                    echo "machine zextras.jfrog.io" >> auth.conf
-                                    echo "login $USERNAME" >> auth.conf
-                                    echo "password $SECRET" >> auth.conf
-                                    mv auth.conf /etc/apt
-                                    echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel jammy main" > zextras.list
-                                    mv zextras.list /etc/apt/sources.list.d/
-                                '''
-                            ],
-                            'ubuntu-noble': [
-                                preBuildScript: '''
-                                    echo "machine zextras.jfrog.io" >> auth.conf
-                                    echo "login $USERNAME" >> auth.conf
-                                    echo "password $SECRET" >> auth.conf
-                                    mv auth.conf /etc/apt
-                                    echo "deb [trusted=yes] https://zextras.jfrog.io/artifactory/ubuntu-devel noble main" > zextras.list
-                                    mv zextras.list /etc/apt/sources.list.d/
-                                '''
-                            ],
-                            'rocky-8': [
-                                preBuildScript: '''
-                                    echo "[Zextras]" > zextras.repo
-                                    echo "baseurl=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-devel/" >> zextras.repo
-                                    echo "enabled=1" >> zextras.repo
-                                    echo "gpgcheck=0" >> zextras.repo
-                                    echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/centos8-devel/repomd.xml.key" >> zextras.repo
-                                    mv zextras.repo /etc/yum.repos.d/zextras.repo
-                                '''
-                            ],
-                            'rocky-9': [
-                                preBuildScript: '''
-                                    echo "[Zextras]" > zextras.repo
-                                    echo "baseurl=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/rhel9-devel/" >> zextras.repo
-                                    echo "enabled=1" >> zextras.repo
-                                    echo "gpgcheck=0" >> zextras.repo
-                                    echo "gpgkey=https://$USERNAME:$SECRET@zextras.jfrog.io/artifactory/rhel9-devel/repomd.xml.key" >> zextras.repo
-                                    mv zextras.repo /etc/yum.repos.d/zextras.repo
-                                '''
-                            ],
-                        ]
-                    ])
-                }
+                buildStage(
+                    addCarbonioRepos: true,
+                    parallelBuilds: true,
+                    prepare: true,
+                )
+                buildStage(
+                    addCarbonioRepos: true,
+                    architecture: 'aarch64',
+                    buildFlags: ' --only carbonio-erlang ',
+                    distros: ['ubuntu-jammy'],
+                    parallelBuilds: false,
+                    prepare: true,
+                )
             }
             post {
                 failure {
@@ -117,8 +76,10 @@ pipeline {
                 jfrog 'jfrog-cli'
             }
             steps {
+                uploadStage()
                 uploadStage(
-                    packages: yapHelper.resolvePackageNames()
+                    architecture: 'aarch64',
+                    distros: ['ubuntu-jammy'],
                 )
             }
             post {
