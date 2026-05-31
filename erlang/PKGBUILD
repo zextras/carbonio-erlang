@@ -6,7 +6,7 @@ pkgname="carbonio-erlang"
 pkgver="27.3.4.8" # renovate: datasource=github-tags depName=erlang/otp
 pkgrel="1"
 pkgdesc="General-purpose concurrent functional programming language (headless version)"
-arch=('x86_64')
+arch=('aarch64' 'x86_64')
 url="https://erlang.org/"
 maintainer="Zextras <packages@zextras.com>"
 license=("Apache-2.0")
@@ -55,16 +55,57 @@ sha256sums=(
 
 build() {
   cd "${srcdir}/otp-OTP-${pkgver}"
-
   ./otp_build autoconf
 
-  ./configure \
-    --enable-builtin-zlib \
-    --enable-smp-support \
-    --prefix=/opt/zextras/common \
-    --with-odbc \
-    --with-ssl=/opt/zextras/common
-  make release
+  if [ -n "${CROSS_COMPILE}" ]; then
+    # Step 1: Build native bootstrap in-tree following OTP's documented
+    # cross-compilation workflow. We use --enable-bootstrap-only to get
+    # erlc/escript for BEAM compilation, then cross-configure in the same tree.
+    # Save/restore cross-compile env for the native phase
+    _save_CC="${CC}"
+    _save_CXX="${CXX}"
+    _save_PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}"
+    _save_PKG_CONFIG_PATH="${PKG_CONFIG_PATH}"
+    unset CC CXX
+    unset PKG_CONFIG_LIBDIR PKG_CONFIG_PATH
+
+    CC=gcc CXX=g++ ./configure \
+      --enable-bootstrap-only \
+      --enable-builtin-zlib \
+      --enable-smp-support \
+      --without-termcap
+    make -j$(nproc)
+
+    # Bootstrap binaries are in bin/ — add to PATH
+    export PATH="${PWD}/bin:${PATH}"
+
+    # Step 2: Cross-compile for target architecture
+    export CC="${_save_CC}"
+    export CXX="${_save_CXX}"
+    export PKG_CONFIG_LIBDIR="${_save_PKG_CONFIG_LIBDIR}"
+    [ -n "${_save_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${_save_PKG_CONFIG_PATH}" || unset PKG_CONFIG_PATH
+
+    ./configure \
+      --enable-builtin-zlib \
+      --enable-smp-support \
+      --without-termcap \
+      --prefix=/opt/zextras/common \
+      --with-odbc \
+      --host="${CROSS_COMPILE_HOST}" \
+      --build="$(./erts/autoconf/config.guess 2>/dev/null || uname -m)" \
+      --with-ssl-include=/opt/zextras/common/include \
+      --with-ssl-lib=/opt/zextras/common/lib
+
+    make -j$(nproc) release
+  else
+    ./configure \
+      --enable-builtin-zlib \
+      --enable-smp-support \
+      --prefix=/opt/zextras/common \
+      --with-odbc \
+      --with-ssl=/opt/zextras/common
+    make -j$(nproc) release
+  fi
 }
 
 package() {
