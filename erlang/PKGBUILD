@@ -74,7 +74,7 @@ build() {
       --enable-builtin-zlib \
       --enable-smp-support \
       --without-termcap
-    make -j$(nproc)
+    make -j"$(nproc)"
 
     # Bootstrap binaries are in bin/ — add to PATH
     export PATH="${PWD}/bin:${PATH}"
@@ -83,7 +83,24 @@ build() {
     export CC="${_save_CC}"
     export CXX="${_save_CXX}"
     export PKG_CONFIG_LIBDIR="${_save_PKG_CONFIG_LIBDIR}"
-    [ -n "${_save_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${_save_PKG_CONFIG_PATH}" || unset PKG_CONFIG_PATH
+    if [ -n "${_save_PKG_CONFIG_PATH}" ]; then
+      export PKG_CONFIG_PATH="${_save_PKG_CONFIG_PATH}"
+    else
+      unset PKG_CONFIG_PATH
+    fi
+
+    if [ -z "${YAP_CROSS_SYSROOT}" ] || [ ! -d "${YAP_CROSS_SYSROOT}" ]; then
+      echo "YAP_CROSS_SYSROOT must be set to an existing directory for cross builds"
+      return 1
+    fi
+
+    # Without erl_xcomp_sysroot, OTP drops crypto, ssh and ssl outright when
+    # cross compiling and writes lib/<app>/SKIP saying so — whatever
+    # --with-ssl says (lib/crypto/configure, erl_xcomp_without_sysroot).
+    # With it set, every SSL path is probed as $erl_xcomp_sysroot$dir and the
+    # runtime library path is derived by stripping the sysroot back off, so
+    # --with-ssl takes the on-target prefix, not the sysroot-qualified one.
+    export erl_xcomp_sysroot="${YAP_CROSS_SYSROOT}"
 
     ./configure \
       --enable-builtin-zlib \
@@ -93,10 +110,9 @@ build() {
       --with-odbc \
       --host="${CROSS_COMPILE_HOST}" \
       --build="$(./erts/autoconf/config.guess 2>/dev/null || uname -m)" \
-      --with-ssl-include=/opt/zextras/common/include \
-      --with-ssl-lib=/opt/zextras/common/lib
+      --with-ssl=/opt/zextras/common
 
-    make -j$(nproc) release
+    make -j"$(nproc)" release
   else
     ./configure \
       --enable-builtin-zlib \
@@ -104,7 +120,7 @@ build() {
       --prefix=/opt/zextras/common \
       --with-odbc \
       --with-ssl=/opt/zextras/common
-    make -j$(nproc) release
+    make -j"$(nproc)" release
   fi
 }
 
@@ -112,6 +128,18 @@ package() {
   cd "${srcdir}"
 
   make -C otp-OTP-${pkgver} DESTDIR="${pkgdir}" install
+
+  # configure omits crypto, ssh and ssl entirely when it cannot locate
+  # OpenSSL, and says so only in a log line nobody reads. The result is an
+  # Erlang that cannot run rebar3 or serve TLS, which is worse than a failed
+  # build — the aarch64 package shipped that way. Fail loudly instead.
+  for _app in crypto ssh ssl; do
+    if [ -z "$(find "${pkgdir}/opt/zextras/common/lib/erlang/lib" \
+      -maxdepth 1 -type d -name "${_app}-*" -print -quit)" ]; then
+      echo "OTP application ${_app} was not built: configure did not find OpenSSL"
+      return 1
+    fi
+  done
 
   # services and configuration
   install -Dm644 epmd.service "${pkgdir}/lib/systemd/system/epmd.service"

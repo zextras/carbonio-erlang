@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 Zextras <https://www.zextras.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-only
+
+# Disabled checks (with rationale):
+#   SC2154 - vars referenced but not assigned: PKGBUILD vars (srcdir, pkgdir,
+#            pkgver, CROSS_COMPILE, ...) are injected by the yap build system.
+#   SC2164 - `cd` without `|| exit`: PKGBUILD build()/package() run under the
+#            packager's `set -e`, so a failed `cd` already aborts the build.
+#   SC2034 - assigned but unused vars: PKGBUILD metadata vars (pkgdesc, arch,
+#            license, ...) are consumed by the build system, not the script.
+disable=SC2154,SC2164,SC2034
+shell=bash
