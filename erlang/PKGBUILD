@@ -102,6 +102,15 @@ build() {
     # --with-ssl takes the on-target prefix, not the sysroot-qualified one.
     export erl_xcomp_sysroot="${YAP_CROSS_SYSROOT}"
 
+    # --with-ssl=PATH alone is not enough here: with cross_compiling=yes,
+    # lib/crypto/configure derives the runtime rpath by stripping
+    # $erl_xcomp_sysroot off SSL_LIBDIR, but SSL_LIBDIR was probed without
+    # the sysroot prefix, so the strip yields an empty string and crypto.so
+    # ends up with a corrupted RUNPATH missing /opt/zextras/common/lib (the
+    # loader then falls back to the distro's OpenSSL 3.0.2 and crypto.so
+    # fails with "OPENSSL_3.4.0 not found"). --with-ssl-rpath sets the rpath
+    # from the given dirs directly and errors out at configure time if the
+    # resulting link fails, instead of shipping a silently broken .so.
     ./configure \
       --enable-builtin-zlib \
       --enable-smp-support \
@@ -110,7 +119,8 @@ build() {
       --with-odbc \
       --host="${CROSS_COMPILE_HOST}" \
       --build="$(./erts/autoconf/config.guess 2>/dev/null || uname -m)" \
-      --with-ssl=/opt/zextras/common
+      --with-ssl=/opt/zextras/common \
+      --with-ssl-rpath=/opt/zextras/common/lib
 
     make -j"$(nproc)" release
   else
@@ -140,6 +150,24 @@ package() {
       return 1
     fi
   done
+
+  # The RPATH bug fixed by --with-ssl-rpath above can silently regress if
+  # configure's cross-compile branch changes again — verify the shipped
+  # crypto NIF really carries /opt/zextras/common/lib in its RUNPATH so the
+  # loader picks carbonio-openssl instead of the distro's libcrypto.
+  _readelf="readelf"
+  if [ -n "${CROSS_COMPILE}" ] && command -v "${CROSS_COMPILE}readelf" >/dev/null 2>&1; then
+    _readelf="${CROSS_COMPILE}readelf"
+  fi
+  if command -v "${_readelf}" >/dev/null 2>&1; then
+    _crypto_so="$(find "${pkgdir}/opt/zextras/common/lib/erlang/lib" \
+      -path '*/crypto-*/priv/lib/crypto.so' -print -quit)"
+    if [ -z "${_crypto_so}" ] || ! "${_readelf}" -d "${_crypto_so}" \
+      | grep -E 'R(UN)?PATH' | grep -q '/opt/zextras/common/lib'; then
+      echo "${_crypto_so:-crypto.so} is missing /opt/zextras/common/lib in its RPATH/RUNPATH: the build linked against the wrong OpenSSL search path"
+      return 1
+    fi
+  fi
 
   # services and configuration
   install -Dm644 epmd.service "${pkgdir}/lib/systemd/system/epmd.service"
