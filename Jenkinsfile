@@ -92,6 +92,12 @@ pipeline {
                 }
             }
         }
+
+        stage('Semantic Release') {
+            steps {
+                semanticRelease()
+            }
+        }
     }
 }
 
